@@ -1,0 +1,161 @@
+{
+    "levels": {
+        "1": {
+            "waypoints": [
+                [-30, 300],
+                [200, 300],
+                [200, 100],
+                [450, 100],
+                [450, 400],
+                [830, 400]
+            ],
+            "enemies":{
+                "goblin": 10
+            },
+            "player_stat": {
+                "life": 200,
+                "coin": 1000
+            }
+        },
+        "2": {
+            "waypoints": [
+                [-30, 500],
+                [400, 500],
+                [400, 400],
+                [300, 400],
+                [300, 200],
+                [830, 200]
+            ],
+            "enemies":{
+                "goblin": 20,
+                "armor goblin": 10
+            },
+            "player_stat": {
+                "life": 200,
+                "coin": 2000
+            }
+        }
+    },
+    "enemies": {
+        "goblin": {
+            "health": 100,
+            "dmg": 10,
+            "armor": 0,
+            "mp": 0,
+            "speed": 1.2,
+            "size": 20,
+            "reward": 10,
+            "player_dmg": 10,
+            "spawn_rate": 1000,
+            "color": [0, 255, 0]
+        },
+        "armor goblin": {
+            "health": 100,
+            "dmg": 15,
+            "armor": 100,
+            "mp": 0,
+            "speed": 1,
+            "size": 20,
+            "reward": 25,
+            "player_dmg": 20,
+            "spawn_rate": 1500,
+            "color": [0, 150, 0]
+        },
+        "orc": {
+            "health": 500,
+            "dmg": 50,
+            "armor": 0,
+            "mp": 0,
+            "speed": 1,
+            "size": 40,
+            "reward": 50,
+            "player_dmg": 50,
+            "spawn_rate": 3000,
+            "color": [210, 105, 30]
+        },
+        "armor orc": {
+            "health": 500,
+            "dmg": 100,
+            "armor": 500,
+            "mp": 0,
+            "speed": 1,
+            "size": 40,
+            "reward": 75,
+            "player_dmg": 100,
+            "spawn_rate": 5000,
+            "color": [49, 29, 20]
+        },
+        "mage": {
+            "health": 200,
+            "dmg": 400,
+            "armor": 0,
+            "mp": 200,
+            "speed": 1,
+            "size": 40,
+            "reward": 75,
+            "player_dmg": 100,
+            "spawn_rate": 2000,
+            "color": [49, 29, 20]
+        }
+    },
+    "towers": {
+        "canon": {
+            "dmg": {
+                "physic": 100,
+                "magic": 0,
+                "brut": 0
+            },
+            "p_speed":  5,
+            "range": 100,
+            "cooldown": 1000,
+            "color": [100, 100, 100],
+            "cost": 50
+        },
+        "arc": {
+            "dmg": {
+                "physic": 200,
+                "magic": 0,
+                "brut": 0
+            },
+            "p_speed":  7,
+            "range": 200,
+            "cooldown": 2000,
+            "color": [100, 240, 100],
+            "cost": 100
+        },
+        "sniper": {
+            "dmg": {
+                "physic": 500,
+                "magic": 0,
+                "brut": 200
+            },
+            "p_speed":  40,
+            "range": 400,
+            "cooldown": 5000,
+            "color": [0, 0, 100],
+            "cost": 500
+        },
+        "tesla": {
+            "dmg": {
+                "physic": 100,
+                "magic": 0,
+                "brut": 0
+            },
+            "range": 100,
+            "cooldown": 1000,
+            "color": [100, 100, 100],
+            "cost": 50
+        },
+        "freezer": {
+            "dmg": {
+                "physic": 100,
+                "magic": 0,
+                "brut": 0
+            },
+            "range": 100,
+            "cooldown": 1000,
+            "color": [100, 100, 100],
+            "cost": 50
+        }
+    }
+}
