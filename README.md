@@ -43,6 +43,7 @@ Tower Defense Game is a classic tower defense game where the player's goal is to
 3. Install the required dependencies:
 
     ```shell
+    source ./venv/bin/activate
     pip install -r requirements.txt
     ```
 
