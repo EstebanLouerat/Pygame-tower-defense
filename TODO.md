@@ -2,11 +2,12 @@
 - [x] Repair enemy path: make it larger, don't able to put tower in it ...
 - [x] Make the life decrease when enemies quit the screen
 - [x] Make differente level
-- [_] Make Sound design
+- [ ] Make Sound design
 - [x] Make different enemies
-- [_] Make different projectil
+- [ ] Make different projectil
 - [x] Repair the replay button
 - [x] Make basic three enemies type like: goblin, armor gobli and orc
-- [_] Like LoL make stat: physical damage, magical damage, armor penetration
-- [_] Menu 
-- [_] Right click on a tower show options and on enemies show stat
+- [ ] Like LoL make stat: physical damage, magical damage, armor penetration
+- [ ] Menu 
+- [ ] Right click on a tower show options and on enemies show stat
+- [ ] Enhances the project structure 
