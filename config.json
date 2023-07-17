@@ -111,6 +111,18 @@
             "color": [100, 100, 100],
             "cost": 50
         },
+        "machine gun": {
+            "dmg": {
+                "physic": 100,
+                "magic": 100,
+                "brut": 100
+            },
+            "p_speed":  20,
+            "range": 50,
+            "cooldown": 250,
+            "color": [200, 200, 100],
+            "cost": 500
+        },
         "arc": {
             "dmg": {
                 "physic": 200,

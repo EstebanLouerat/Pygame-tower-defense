@@ -20,6 +20,7 @@ ORANGE = (255, 165, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+LIGHT_BLUE = (100, 100, 255) 
 
 # Define game variables
 FPS = 60
@@ -39,10 +40,12 @@ data = load_config()
 enemy_data = data["enemies"]
 tower_data = data["towers"]
 level_data = data["levels"]
-current_lvl = 1
+current_lvl = 2
 
 level_start_time = pygame.time.get_ticks()
 pause_time = 0
+
+selected_tower = "canon"
 
 # Define classes for Tower, Enemy, and Projectile
 class Tower(pygame.sprite.Sprite):
@@ -59,7 +62,7 @@ class Tower(pygame.sprite.Sprite):
         self.attack_cooldown = self.data['cooldown']  # milliseconds
         self.color = self.data['color']
         
-        self.image = pygame.Surface((50, 50))
+        self.image = pygame.Surface((30, 30))
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -86,6 +89,10 @@ class Tower(pygame.sprite.Sprite):
 
             pygame.draw.circle(window, (range_color[0], range_color[1], range_color[2], range_alpha),
                             range_pos, self.attack_range, 1)
+    
+    def is_hovered(self):
+        return self.rect.collidepoint(pygame.mouse.get_pos())
+    
     def update(self):
         # Find the closest enemy within attack range
         target = None
@@ -130,6 +137,10 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = self.target_waypoint[1] - self.offset
         self.health = self.max_health
         self.armor = self.max_armor
+        self.last_spawn_time = pygame.time.get_ticks()
+    
+    def is_hovered(self):
+        return self.rect.collidepoint(pygame.mouse.get_pos())
 
     def update(self):
         # Move towards the current waypoint
@@ -139,10 +150,9 @@ class Enemy(pygame.sprite.Sprite):
         if distance > 0:
             dx /= distance
             dy /= distance
+        # print("dx: ", dx, "dy: ", dy)
         self.rect.x += dx * self.speed
         self.rect.y += dy * self.speed
-        print(f'x: {self.rect.x}, y: {self.rect.y}')
-        
 
         # Check if reached the current waypoint
         if distance <= self.speed:
@@ -193,7 +203,7 @@ class Enemy(pygame.sprite.Sprite):
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, x, y, angle, damage, speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface((10, 10))
+        self.image = pygame.Surface((5, 5))
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -210,13 +220,19 @@ class Projectile(pygame.sprite.Sprite):
         if self.rect.left > WIDTH or self.rect.right < 0 or self.rect.top > HEIGHT or self.rect.bottom < 0:
             self.kill()
 
-class PlayerOverlay:
-    def __init__(self, current_lvl_coin):
+class PlayerOverlay():
+    def __init__(self, current_lvl_coin): 
+        
+        self.tower_bar = TowerBar()
+        
         self.max_life = 200
         self.life = self.max_life
         self.max_coin = current_lvl_coin
         self.coin = self.max_coin
         self.font = pygame.font.Font(None, 36)
+    
+    def is_hovered(self):
+        return self.tower_bar.is_hovered()
 
     def decrease_life(self, amount):
         self.life -= amount
@@ -230,8 +246,8 @@ class PlayerOverlay:
     
     def increase_coin(self, amount):
         self.coin += amount
-        if self.coin > 99999:
-            self.coin = 99999
+        if self.coin > 999999:
+            self.coin = 999999
 
     def draw(self):
         life_text = self.font.render(f"Life: {self.life}", True, BLACK)
@@ -249,41 +265,97 @@ class PlayerOverlay:
         window.blit(life_text, (10, 10))
         window.blit(coin_text, (10, 40))
         window.blit(time_text, (600, 10))
+        
+        self.tower_bar.draw()
+        
+class TowerBar():
+    def __init__(self):
+        self.x = WIDTH // 2 - 250
+        self.y = HEIGHT // 2 + 240
+        self.rect = pygame.Rect(self.x, self.y, 500, 50)
+        self.font = pygame.font.Font(None, 20)
+
+        # Options
+        self.opt1 = TowerBarButton(self.x + 105, self.y + 5, "canon")
+        self.opt2 = TowerBarButton(self.x + 230, self.y + 5, "arc")
+        self.opt3 = TowerBarButton(self.x + 355, self.y + 5, "machine gun")
+        self.opt1.selected = True
+    
+    
+    def is_hovered(self):
+        return self.rect.collidepoint(pygame.mouse.get_pos())
+
+    def draw(self):
+        pygame.draw.rect(window, (0, 100, 100), self.rect)
+        self.opt1.draw()
+        self.opt2.draw()
+        self.opt3.draw()
+
+    def handle_event(self, event):
+        global selected_tower
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if self.opt1.is_hovered():
+                print(self.opt1.type, "clicked")
+                selected_tower = self.opt1.type
+                self.opt1.selected = True
+                self.opt2.selected = False
+                self.opt3.selected = False
+            if self.opt2.is_hovered():
+                print(self.opt2.type, "clicked")
+                selected_tower = self.opt2.type
+                self.opt2.selected = True
+                self.opt1.selected = False
+                self.opt3.selected = False
+            if self.opt3.is_hovered():
+                print(self.opt3.type, "clicked")
+                selected_tower = self.opt3.type
+                self.opt3.selected = True
+                self.opt2.selected = False
+                self.opt1.selected = False
+
+class TowerBarButton:
+    def __init__(self, x, y, _type):
+        self.hover_color = LIGHT_BLUE
+        self.color = WHITE
+        self.rect = pygame.Rect(x, y, 40, 40)
+        self.rect.center = (x + 20, y + 20)
+        self.font = pygame.font.Font(None, 20)
+        self.selected = False
+        self.outline = 0
+        self.selected_color = BLUE
+        self.type = _type
+
+    def draw(self):
+        if self.is_hovered():
+            pygame.draw.rect(window, self.hover_color, self.rect)
+        if self.selected:
+            self.color = self.selected_color
+            self.outline = 4
+        else:
+            self.color = WHITE
+            self.outline = 0
+            # pygame.draw.rect(window, sel, self.rect, 4)
+        pygame.draw.rect(window, self.color, self.rect, self.outline)
+        text = self.font.render(self.type, True, BLACK)
+        text_rect = text.get_rect(center=self.rect.center)
+        window.blit(text, text_rect)
+
+    def is_hovered(self):
+        return self.rect.collidepoint(pygame.mouse.get_pos())
+        
 
 class ReplayButton:
     def __init__(self):
-        self.onHoverColor = BLUE
+        self.hover_color = BLUE
         self.rect = pygame.Rect(350, 250, 100, 50)
         self.font = pygame.font.Font(None, 36)
         self.is_clicked = False
 
     def draw(self):
         if self.is_hovered():
-            pygame.draw.rect(window, self.onHoverColor, self.rect)
+            pygame.draw.rect(window, self.hover_color, self.rect)
         else:
             pygame.draw.rect(window, WHITE, self.rect)
-        pygame.draw.rect(window, BLACK, self.rect, 2)
-        text = self.font.render("Replay", True, BLACK)
-        text_rect = text.get_rect(center=self.rect.center)
-        window.blit(text, text_rect)
-
-    def is_hovered(self):
-        return self.rect.collidepoint(pygame.mouse.get_pos())
-
-    def handle_event(self, event):
-        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            if self.is_hovered() and game_over:  # Only handle event if game over
-                self.is_clicked = True
-
-class PlaceTowerMenu:
-    def __init__(self):
-        self.onHoverColor = BLUE
-        self.rect = pygame.Rect(350, 250, 100, 50)
-        self.font = pygame.font.Font(None, 36)
-        self.is_clicked = False
-
-    def draw(self):
-        pygame.draw.rect(window, LIGHT_GREY, self.rect)
         pygame.draw.rect(window, BLACK, self.rect, 2)
         text = self.font.render("Replay", True, BLACK)
         text_rect = text.get_rect(center=self.rect.center)
@@ -338,7 +410,7 @@ def pause(event):
         # Refresh the display
         pygame.display.flip()
         clock.tick(FPS)
-    pause_time = pygame.time.get_ticks() - time
+    pause_time += pygame.time.get_ticks() - time
     
 def update_damage(enemies, projectiles):
     # Check for collisions between projectiles and enemies
@@ -362,6 +434,11 @@ def update_damage(enemies, projectiles):
             else:
                 return
 
+goblin = Enemy(waypoints, "goblin")
+ar_goblin = Enemy(waypoints, "armor goblin")
+orc = Enemy(waypoints, "orc")
+ar_orc = Enemy(waypoints, "armor orc")
+
 # Game loop
 while is_running:
     for event in pygame.event.get():
@@ -382,6 +459,7 @@ while is_running:
                 enemies.add(enemy)
 
         replay_button.handle_event(event)
+        player_overlay.tower_bar.handle_event(event)
 
         if game_over and replay_button.is_clicked:
             # Reset game state
@@ -398,44 +476,53 @@ while is_running:
 
         if not game_over:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-                tower = Tower(mouse_pos[0], mouse_pos[1], 'sniper')
-                if player_overlay.coin >= tower.cost:
-                    all_sprites.add(tower)
-                    towers.add(tower)
-                    player_overlay.coin -= tower.cost
-                else:
-                    error_tick = pygame.time.get_ticks()
-                    is_slowmotion = True
-                    not_enough_coin = True
+                if not player_overlay.is_hovered():
+                    mouse_pos = pygame.mouse.get_pos()
+                    tower = Tower(mouse_pos[0], mouse_pos[1], selected_tower)
+                    if player_overlay.coin >= tower.cost:
+                        all_sprites.add(tower)
+                        towers.add(tower)
+                        player_overlay.coin -= tower.cost
+                    else:
+                        error_tick = pygame.time.get_ticks()
+                        is_slowmotion = True
+                        not_enough_coin = True
 
-    if not game_over:
-        # # Create new enemy
-        # current_time = pygame.time.get_ticks()
-        # spawn_rate = enemy_data['goblin']['spawn_rate']
+    if not game_over:        
+        # Create new enemies
+        current_time = pygame.time.get_ticks()
+
         
-        # if (current_time - level_start_time) % spawn_rate == 0:
-        #     enemy = Enemy(waypoints, "goblin")
-        #     all_sprites.add(enemy)
-        #     enemies.add(enemy)
+        # print("current_time", current_time, "spawn_rate", goblin.spawn_rate, "last_spawn_time", goblin.last_spawn_time)
         
-        # # Create new enemy
-        # if random.randint(0, 100) < 1 :
-        #     enemy = Enemy(waypoints, "armor goblin")
-        #     all_sprites.add(enemy)
-        #     enemies.add(enemy)
+        if current_time - goblin.last_spawn_time > goblin.spawn_rate :
+            new_goblin = Enemy(waypoints, "goblin")
+            # print("Goblin spawned")
+            all_sprites.add(new_goblin)
+            enemies.add(new_goblin)
+            goblin.last_spawn_time = current_time
         
-        # # Create new enemy
-        # if random.randint(0, 1000) < 10 :
-        #     enemy = Enemy(waypoints, "orc")
-        #     all_sprites.add(enemy)
-        #     enemies.add(enemy)
+        if current_time - ar_goblin.last_spawn_time > ar_goblin.spawn_rate :
+            new_ar_goblin = Enemy(waypoints, "armor goblin")
+            # print("Armor Goblin spawned")
+            all_sprites.add(new_ar_goblin)
+            enemies.add(new_ar_goblin)
+            ar_goblin.last_spawn_time = current_time
         
-        # # Create new enemy
-        # if random.randint(0, 1000) < 10 :
-        #     enemy = Enemy(waypoints, "armor orc")
-        #     all_sprites.add(enemy)
-        #     enemies.add(enemy)
+        if current_time - orc.last_spawn_time > orc.spawn_rate :
+            new_orc = Enemy(waypoints, "orc")
+            # print("Orc spawned")
+            all_sprites.add(new_orc)
+            enemies.add(new_orc)
+            orc.last_spawn_time = current_time
+            
+        if current_time - ar_orc.last_spawn_time > ar_orc.spawn_rate :
+            new_ar_orc = Enemy(waypoints, "armor orc")
+            # print("Armor Orc spawned")
+            all_sprites.add(new_ar_orc)
+            enemies.add(new_ar_orc)
+            ar_orc.last_spawn_time = current_time
+
 
         # Update game
         all_sprites.update()
@@ -459,7 +546,6 @@ while is_running:
     # Draw on the window
     window.fill(LIGHT_GREY)
     pygame.draw.lines(window, (200, 10, 10), False, waypoints, 35)  # Draw enemy path
-    player_overlay.draw()  # Draw player life counter
 
     if game_over:
         replay_button.draw()  # Draw replay button
@@ -467,11 +553,15 @@ while is_running:
         for enemy in enemies:
             enemy.draw_health_bar()
             enemy.draw_armor_bar()
+
         all_sprites.draw(window)
         
      # Draw tower ranges
         for tower in towers:
-            tower.draw_range()
+            if tower.is_hovered():
+                tower.draw_range()
+                
+    player_overlay.draw()  # Draw player life counter
 
     if not_enough_coin:
             if pygame.time.get_ticks() - error_tick > error_time:
