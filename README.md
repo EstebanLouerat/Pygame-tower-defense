@@ -40,12 +40,16 @@ Tower Defense Game is a classic tower defense game where the player's goal is to
     ```shell
     cd tower-defense-game
     ```
-3. Install the required dependencies:
-   - Linux: 
+3. Init virtual enviroment:
+     ```shell
+     python3 -m venv venv
+     ```
+4. Install the required dependencies:
+   - Windows: 
     ```shell
     .\.venv\Scripts\activate.bat
     ```
-    - Windows: 
+    - Linux: 
     ```shell
     source ./venv/bin/activate
     ```
